@@ -1,36 +1,34 @@
 import streamlit as st
-import yfinance as finance
- 
- 
-def get_ticker(name):
-    company = finance.Ticker(name)
-    return company
- 
- 
-st.title("Build and Deploy Stock Market App Using Streamlit")
-st.header("A Basic Data Science Web Application")
-st.sidebar.header("Geeksforgeeks \n TrueGeeks")
- 
-company1 = get_ticker("GOOGL")
-company2 = get_ticker("MSFT")
+import yfinance as yf
 
-google = finance.download("GOOGL", start="2021-10-01", end="2021-10-01")
-microsoft = finance.download("MSFT", start="2021-10-01", end="2021-10-01")
 
-data1 = company1.history(period="3mo")
-data2 = company2.history(period="3mo")
- 
-st.write("""
-### Google
-""")
-st.write(company1.info['longBusinessSummary'])  
-st.write(google)
- 
-# plots the graph
-st.line_chart(data1.values)  
- 
-st.write("""
-### Microsoft
-""")
-st.write(company2.info['longBusinessSummary'], "\n", microsoft)
-st.line_chart(data2.values)
+def fetch_ticker_data(symbol):
+    return yf.Ticker(symbol)
+
+
+st.title("Interactive Stock Market Dashboard")
+st.header("Analyze Stock Prices Using Python & Streamlit")
+st.sidebar.header("Powered by: Data Enthusiasts")
+
+
+symbol = st.sidebar.text_input("Enter a stock symbol", "GOOGL")
+start_date = st.sidebar.date_input("Start Date", value="2021-10-01")
+end_date = st.sidebar.date_input("End Date", value="2021-10-01")
+
+
+with st.spinner('Fetching data...'):
+    stock_data = fetch_ticker_data(symbol)
+    stock_prices = yf.download(symbol, start=start_date, end=end_date)
+    stock_history = stock_data.history(period="3mo")
+
+
+st.subheader(f"{symbol.upper()} Stock Information")
+summary = stock_data.info.get('longBusinessSummary', 'Summary not available')
+st.write(summary)
+st.write(stock_prices)
+
+
+if not stock_history.empty:
+    st.line_chart(stock_history.values)
+else:
+    st.write(f"No recent data available for {symbol.upper()}.")
